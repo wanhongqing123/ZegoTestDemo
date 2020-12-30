@@ -61,7 +61,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
     layout = new QHBoxLayout(ui->widgetRemote);
     ui->widgetRemote->setLayout(layout);
-
+    LIVEROOM::EnableAGC(false);
+    LIVEROOM::EnableNoiseSuppress(false);
 }
 
 MainWindow::~MainWindow()
