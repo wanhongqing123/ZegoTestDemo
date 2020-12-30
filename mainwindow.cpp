@@ -17,7 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
 
+    LIVEROOM::SetUseTestEnv(true);
+    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
     bool ret = ZGManagerInstance()->InitSdk();
     if (ret) {
         printf("Init Success\n");
@@ -100,10 +103,6 @@ void MainWindow::on_pushButtonCamera_clicked() {
 
 void MainWindow::EnterRoom() {
     std::string roomid = ui->lineEditRoomId->text().toStdString();
-    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
-
-    LIVEROOM::SetUseTestEnv(true);
-    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
     // 设置推流回调
     LIVEROOM::SetLivePublisherCallback(this);
     // 设置拉流回调
@@ -179,6 +178,13 @@ void MainWindow::checkedMicDump(int state) {
         LIVEROOM::SetAudioRecordCallback(this);
         //set.bEncode
        
+        AVE::ExtPrepSet set;
+        set.bEncode = false;    // 不需要编码前处理后的数据，输出 PCM 数据
+        set.nChannel = 0;
+        set.nSamples = 0;
+        set.nSampleRate = 0;
+        LIVEROOM::SetAudioPrep2(&MainWindow::PrepCallback, set);
+
     }
     else {
         LIVEROOM::SetAudioRecordCallback(nullptr);
