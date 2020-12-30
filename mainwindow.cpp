@@ -171,15 +171,6 @@ void MainWindow::checkedMicDump(int state) {
         LIVEROOM::EnableSelectedAudioRecord(ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_CAP,
             44100,2);
         LIVEROOM::SetAudioRecordCallback(this);
-        //set.bEncode
-       
-        AVE::ExtPrepSet set;
-        set.bEncode = false;    // 不需要编码前处理后的数据，输出 PCM 数据
-        set.nChannel = 0;
-        set.nSamples = 0;
-        set.nSampleRate = 0;
-        LIVEROOM::SetAudioPrep2(&MainWindow::PrepCallback, set);
-
     }
     else {
         LIVEROOM::SetAudioRecordCallback(nullptr);
@@ -205,32 +196,12 @@ void MainWindow::checkedSpeakerDump(int state) {
             std::string str = strFileId.toStdString();
             fileSpeaker = fopen(str.c_str(), "wb+");
         }
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC2->checkState() == Qt::Checked) {
-            set.bEncode = true;
-            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
-        //set.bEncode
-        if (id != "") {
-            LIVEROOM::EnableAudioPostp(true, "");
-            LIVEROOM::SetAudioPostpCallback(&MainWindow::PostpCallback, set);
-        }
+        LIVEROOM::EnableSelectedAudioRecord(ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_RENDER,
+            44100, 2);
+        LIVEROOM::SetAudioRecordCallback(this);
     }
     else {
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC2->checkState() == Qt::Checked) {
-            set.bEncode = true;            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
-        if (id != "") {
-            LIVEROOM::EnableAudioPostp(false, "");
-            LIVEROOM::SetAudioPostpCallback(&MainWindow::PostpCallback, set);
-        }
+        LIVEROOM::SetAudioRecordCallback(nullptr);
         if (fileSpeaker) {
             fclose(fileSpeaker);
         }
@@ -284,7 +255,11 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
     int num_channels,
     int bit_depth,
     unsigned int type) {
-    printf("adsfasdfasdf");
+    if (ui->checkBoxSpeaker->checkState() == Qt::Checked) {
+        if (fileSpeaker) {
+            fwrite(pData,data_len,1,fileSpeaker);
+        }
+    }
 };
 
 // IRoom Callback  EnableMic SetAudioBitrate
