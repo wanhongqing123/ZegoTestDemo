@@ -56,12 +56,12 @@ public slots:
     void on_pushButtonRoom_clicked();
     void on_pushButtonConnMic_clicked();
     void on_pushButtonLeave_clicked();
-
+    void on_pushButtonPull_clicked();
     void currentIndexChangedRole(int index);
     void checkedAGC(int);
     void checkedANS(int);
     void checkedAEC(int);
-
+   
     void checkedMicDump(int);
     void checkedSpeakerDump(int);
 public:

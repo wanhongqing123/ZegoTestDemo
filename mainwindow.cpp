@@ -111,20 +111,20 @@ void MainWindow::EnterRoom() {
     // 设置房间回调
     LIVEROOM::SetRoomCallback(this);
     // 登录房间
-    ZGConfigHelperInstance()->SetPublishResolution(640, 480);
+    ZGConfigHelperInstance()->SetPublishResolution(190, 190);
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
-    LIVEROOM::SetRoomConfig(true, true);
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
-
+    LIVEROOM::SetRoomConfig(true, true);
+  
     if (ui->comboBoxRole->currentData().toInt() == 0) {
-        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
+        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
     }
     else
     {
-        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
+        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
     }
 
 }
@@ -197,6 +197,8 @@ void MainWindow::checkedMicDump(int state) {
         }
     }
 }
+
+
 
 void MainWindow::checkedSpeakerDump(int state) {
     curRemoteStreamId = ui->comboBoxRemote->currentText();
@@ -291,6 +293,27 @@ void MainWindow::OnInitSDK(int nError) {
     printf("OnInitSDK error %d\n",nError);
 }
 
+void MainWindow::on_pushButtonPull_clicked() {
+    QWidget* it2 = remoteStreams.value(ui->lineEditPushId->text());
+    std::string str = ui->lineEditPushId->text().toStdString();
+    if (it2) {
+        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
+    }
+    else {
+        QWidget* it = new QWidget();
+        //it->resize( ,ui->widgetRemote->height()-10);
+        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
+        it->setMinimumHeight(ui->widgetRemote->height() - 10);
+        it->setGeometry(remoteStreams.size() * it->width(), 10, it->width(), it->height());
+        layout->addWidget(it);
+        // it->show();
+        remoteStreams.insert(ui->lineEditPushId->text(), it);
+        // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
+    }
+
+   
+}
+
 void MainWindow::OnLoginRoom(int errorCode,
     const char* pszRoomID,
     const ZegoStreamInfo* pStreamInfo,
@@ -299,9 +322,9 @@ void MainWindow::OnLoginRoom(int errorCode,
         printf("Login RoomId %s Success\n", pszRoomID);
 
         if (ui->comboBoxRole->currentData().toInt() == 0) {
-            string stream_id = ZGHelper::Instance()->GetRandomUUID().c_str();
             AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
-            LIVEROOM::StartPublishing("", stream_id.c_str(), publish_flag, "");
+            std::string streamID = ui->lineEditPushId->text().toStdString();
+            LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
         }
     }
     else {
@@ -335,18 +358,18 @@ void MainWindow::add_remotestream(QString streamId) {
     QWidget* it2 = remoteStreams.value(streamId);
     std::string str = streamId.toStdString();
     if (it2) {
-        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
+       // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
     }
     else {
         QWidget* it = new QWidget();
         //it->resize( ,ui->widgetRemote->height()-10);
-       // it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
-        //it->setMinimumHeight(ui->widgetRemote->height() - 10);
-        //it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
-        //layout->addWidget(it);
-        it->show();
+        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
+        it->setMinimumHeight(ui->widgetRemote->height() - 10);
+        it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
+        layout->addWidget(it);
+       // it->show();
         remoteStreams.insert(streamId, it);
-        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
+       // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
     }
 
     ui->comboBoxRemote->addItem(streamId);
