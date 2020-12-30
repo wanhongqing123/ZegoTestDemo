@@ -3,7 +3,7 @@
 #include "ZGManager.h"
 #include "ZGHelper.h"
 #include "ZGConfigHelper.h"
-
+#include "ZegoLiveRoom/zego-api-defines.h"
 #include <QMessageBox>
 #include <QCheckBox>
 #include <QComboBox>
@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
 
    // bool ret = ZGManagerInstance()->InitSdk();
    // if (ret) {
@@ -100,18 +101,19 @@ void MainWindow::on_pushButtonCamera_clicked() {
 
 void MainWindow::EnterRoom() {
     std::string roomid = ui->lineEditRoomId->text().toStdString();
-    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
-
-    LIVEROOM::SetUseTestEnv(true);
-    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
     // 设置推流回调
     LIVEROOM::SetLivePublisherCallback(this);
     // 设置拉流回调
     LIVEROOM::SetLivePlayerCallback(this);
     // 设置房间回调
     LIVEROOM::SetRoomCallback(this);
+
+   
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
+    ZGConfigHelperInstance()->SetVideoBitrate(256000);
+    LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
+    LIVEROOM::StartPreview();
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
@@ -162,27 +164,21 @@ void MainWindow::checkedMicDump(int state) {
             std::string str = strFileId.toStdString();
             fileMic = fopen(str.c_str(),"wb+");
         }
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC->checkState() == Qt::Checked) {
-            set.bEncode = true;
-            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
+        LIVEROOM::EnableSelectedAudioRecord(ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_CAP,
+            44100,2);
+        LIVEROOM::SetAudioRecordCallback(this);
         //set.bEncode
-        LIVEROOM::SetAudioPrepCallback(&MainWindow::PrepCallback,set);
+       
+        AVE::ExtPrepSet set;
+        set.bEncode = false;    // 不需要编码前处理后的数据，输出 PCM 数据
+        set.nChannel = 0;
+        set.nSamples = 0;
+        set.nSampleRate = 0;
+        LIVEROOM::SetAudioPrep2(&MainWindow::PrepCallback, set);
+
     }
     else {
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC->checkState() == Qt::Checked) {
-            set.bEncode = true;
-            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
-        LIVEROOM::SetAudioPrepCallback(nullptr, set);
+        LIVEROOM::SetAudioRecordCallback(nullptr);
         if (fileMic) {
             fclose(fileMic);
         }
@@ -278,6 +274,14 @@ void MainWindow::PostpCallback(const char* streamId, const AudioFrame& inFrame, 
     printf("PostpCallback\n");
 }
 
+void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
+    int data_len,
+    int sample_rate,
+    int num_channels,
+    int bit_depth,
+    unsigned int type) {
+    printf("adsfasdfasdf");
+};
 
 // IRoom Callback  EnableMic SetAudioBitrate
 void MainWindow::OnInitSDK(int nError) {

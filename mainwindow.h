@@ -15,10 +15,13 @@
 #include "ZegoLiveRoom/LiveRoomCallback-Player.h"
 #include "ZegoLiveRoom/zego-api-audio-device.h"
 #include "ZegoLiveRoom/zego-api-audio-aux.h"
+#include "ZegoLiveRoom/AVDefines.h"
+
 using namespace ZEGO;
 using namespace ZEGO::LIVEROOM;
 using namespace AVE;
 using namespace AUDIOAUX;
+//using namespace ZEGO::AV;
 
 class IPushlishRoomCallback : public LIVEROOM::ILivePublisherCallback,
                               public LIVEROOM::IRoomCallback,
@@ -37,7 +40,8 @@ class MainWindow : public QMainWindow,
                    public ILogToView,
                    public IRoomCallback,
                    public ILivePublisherCallback,
-                   public ILivePlayerCallback
+                   public ILivePlayerCallback,
+                   public  ZEGO::AV::IZegoAudioRecordCallback
 {
     Q_OBJECT
 
@@ -73,6 +77,13 @@ public:
 
     static void PrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
     static void PostpCallback(const char* streamId, const AudioFrame& inFrame, AudioFrame& outFrame);
+
+    void OnAudioRecordCallback(const unsigned char* pData,
+        int data_len,
+        int sample_rate,
+        int num_channels,
+        int bit_depth,
+        unsigned int type) override;
 
     // IRoom Callback
     void OnInitSDK(int nError)override;
