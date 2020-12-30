@@ -51,6 +51,12 @@ public slots:
     void on_pushButtonRoom_clicked();
     void on_pushButtonConnMic_clicked();
     void on_pushButtonLeave_clicked();
+
+    void currentIndexChangedRole(int index);
+    void checkedAGC();
+    void checkedANS();
+    void checkedAEC();
+
     static void oPrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
 
     // IRoom Callback

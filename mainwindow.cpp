@@ -21,6 +21,23 @@ MainWindow::MainWindow(QWidget *parent) :
     else {
         printf("Init Failed\n");
     }
+
+    ui->comboBoxRole->clear();
+    ui->comboBoxRole->addItem(QString::fromLocal8Bit("Ö÷²¥"),0);
+    ui->comboBoxRole->addItem(QString::fromLocal8Bit("¹ÛÖÚ"),1);
+
+
+    std::vector<AudioDeviceInfo> vec = ZGConfigHelperInstance()->GetMicDevicesList();
+    ui->comboBoxMic->clear();
+    for (auto iter : vec) {
+        ui->comboBoxMic->addItem(QString::fromLocal8Bit(iter.device_name.c_str()),QString(iter.device_id.c_str()));
+    }
+
+    std::vector< AudioDeviceInfo> vec2 = ZGConfigHelperInstance()->GetSpeakerDevicesList();
+    for (auto iter : vec2) {
+        ui->comboBoxSpeaker->addItem(QString::fromLocal8Bit(iter.device_name.c_str()), QString(iter.device_id.c_str()));
+    }
+
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +99,16 @@ void MainWindow::on_pushButtonRoom_clicked() {
 
 void MainWindow::on_pushButtonConnMic_clicked() {
 
+}
+
+
+void MainWindow::currentIndexChangedRole(int index) {
+}
+void MainWindow::checkedAGC() {
+}
+void MainWindow::checkedANS() {
+}
+void MainWindow::checkedAEC() {
 }
 
 void MainWindow::on_pushButtonLeave_clicked() {
