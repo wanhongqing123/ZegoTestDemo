@@ -227,7 +227,7 @@ void MainWindow::checkedSpeakerDump(int state) {
         }
         //set.bEncode
         if (id != "") {
-            LIVEROOM::EnableAudioPostp(true, id.c_str());
+            LIVEROOM::EnableAudioPostp(true, "");
             LIVEROOM::SetAudioPostpCallback(&MainWindow::PostpCallback, set);
         }
     }
@@ -240,7 +240,7 @@ void MainWindow::checkedSpeakerDump(int state) {
             set.nSamples = 441;
         }
         if (id != "") {
-            LIVEROOM::EnableAudioPostp(false, id.c_str());
+            LIVEROOM::EnableAudioPostp(false, "");
             LIVEROOM::SetAudioPostpCallback(&MainWindow::PostpCallback, set);
         }
         if (fileSpeaker) {
