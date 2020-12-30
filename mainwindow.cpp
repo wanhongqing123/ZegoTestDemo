@@ -168,7 +168,7 @@ void MainWindow::checkedMicDump(int state) {
         else {
             QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
             strFileId = exePath + "\\" + strFileId + "44khz_2_mic";
-            std::string str = exePath.toStdString();
+            std::string str = strFileId.toStdString();
             fileMic = fopen(str.c_str(),"wb+");
         }
         ExtPrepSet set;
@@ -211,7 +211,7 @@ void MainWindow::checkedSpeakerDump(int state) {
         else {
             QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
             strFileId = exePath + "\\" + strFileId + "44khz_2_speaker";
-            std::string str = exePath.toStdString();
+            std::string str = strFileId.toStdString();
             fileSpeaker = fopen(str.c_str(), "wb+");
         }
         ExtPrepSet set;
