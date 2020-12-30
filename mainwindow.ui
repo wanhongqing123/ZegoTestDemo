@@ -227,9 +227,9 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_15">
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QPushButton" name="pushButtonPull">
               <property name="text">
-               <string>拉流id</string>
+               <string>PushButton</string>
               </property>
              </widget>
             </item>
