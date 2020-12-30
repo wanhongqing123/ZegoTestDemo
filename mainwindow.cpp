@@ -18,13 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    bool ret = ZGManagerInstance()->InitSdk();
-    if (ret) {
-        printf("Init Success\n");
-    }
-    else {
-        printf("Init Failed\n");
-    }
+   // bool ret = ZGManagerInstance()->InitSdk();
+   // if (ret) {
+    //    printf("Init Success\n");
+   // }
+   /// else {
+   //     printf("Init Failed\n");
+   // }
 
     ui->comboBoxRole->clear();
     ui->comboBoxRole->addItem(QString::fromLocal8Bit("主播"),0);
@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->checkBoxSpeaker,SIGNAL(stateChanged(int)),this,SLOT(checkedSpeakerDump(int)));
     connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_del_remotestream(QString)),this,SLOT(del_remotestream(QString)),Qt::ConnectionType::QueuedConnection);
-
+    connect(this, SIGNAL(signal_enterroom(QString)),this,SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
     exePath = QString::fromStdString(GetExePath());
 
     layout = new QHBoxLayout(ui->widgetRemote);
@@ -112,21 +112,12 @@ void MainWindow::EnterRoom() {
     LIVEROOM::SetRoomCallback(this);
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
-    LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
-    LIVEROOM::StartPreview();
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
     LIVEROOM::SetRoomConfig(true, true);
-  
-    if (ui->comboBoxRole->currentData().toInt() == 0) {
-        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
-    }
-    else
-    {
-        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
-    }
 
+    ZGManagerInstance()->InitSdk();
 }
 
 void MainWindow::LeaveRoom() {
@@ -291,11 +282,38 @@ void MainWindow::PostpCallback(const char* streamId, const AudioFrame& inFrame, 
 // IRoom Callback  EnableMic SetAudioBitrate
 void MainWindow::OnInitSDK(int nError) {
     printf("OnInitSDK error %d\n",nError);
+    if (nError != 0)
+        return;
+
+    //if (bFirstInit) {
+      //  bFirstInit = false;
+     //   return;
+   // }
+    if (nError == 0) {
+        std::string roomid = ui->lineEditRoomId->text().toStdString();
+        if (ui->comboBoxRole->currentData().toInt() == 0) {
+            LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
+        }
+        else
+        {
+            LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
+        }
+    }
 }
 
 void MainWindow::on_pushButtonPull_clicked() {
     std::string str = ui->lineEditPushId->text().toStdString();
     LIVEROOM::StartPlayingStream(str.c_str(), (void*)ui->label_2->winId());
+}
+
+void MainWindow::StartPushlishToServer(QString ) {
+    LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
+    LIVEROOM::StartPreview();
+    if (ui->comboBoxRole->currentData().toInt() == 0) {
+        AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
+        std::string streamID = ui->lineEditPushId->text().toStdString();
+        LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
+    }
 }
 
 void MainWindow::OnLoginRoom(int errorCode,
@@ -304,12 +322,7 @@ void MainWindow::OnLoginRoom(int errorCode,
     unsigned int streamCount) {
     if (errorCode == 0) {
         printf("Login RoomId %s Success\n", pszRoomID);
-
-        if (ui->comboBoxRole->currentData().toInt() == 0) {
-            AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
-            std::string streamID = ui->lineEditPushId->text().toStdString();
-            LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
-        }
+        emit signal_enterroom("");
     }
     else {
         printf("Login RoomId %s failed \n", pszRoomID);

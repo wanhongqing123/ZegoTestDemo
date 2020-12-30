@@ -48,6 +48,7 @@ public:
 signals:
     void signal_add_remotestream(QString streamId);
     void signal_del_remotestream(QString streamId);
+    void signal_enterroom(QString streamId);
 public slots:
     void add_remotestream(QString streamId);
     void del_remotestream(QString streamId);
@@ -64,6 +65,7 @@ public slots:
    
     void checkedMicDump(int);
     void checkedSpeakerDump(int);
+    void StartPushlishToServer(QString);
 public:
     void EnterRoom();
     void LeaveRoom();
@@ -187,6 +189,7 @@ private:
     FILE* fileMic = nullptr;
     FILE* fileSpeaker = nullptr;
     QString curRemoteStreamId;
+    bool bFirstInit = true;
 };
 
 #endif // MAINWINDOW_H
