@@ -129,6 +129,7 @@ void MainWindow::EnterRoom() {
 }
 
 void MainWindow::LeaveRoom() {
+    LIVEROOM::StopPreview();
     LIVEROOM::StopPublishing();
     LIVEROOM::LogoutRoom();
     if (fileMic) {
@@ -338,10 +339,10 @@ void MainWindow::add_remotestream(QString streamId) {
     else {
         QWidget* it = new QWidget();
         //it->resize( ,ui->widgetRemote->height()-10);
-        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
-        it->setMinimumHeight(ui->widgetRemote->height() - 10);
-        it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
-        layout->addWidget(it);
+       // it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
+        //it->setMinimumHeight(ui->widgetRemote->height() - 10);
+        //it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
+        //layout->addWidget(it);
         it->show();
         remoteStreams.insert(streamId, it);
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
@@ -489,7 +490,7 @@ void MainWindow::OnCaptureAudioFirstFrame() {
 };
 
 void MainWindow::OnPlayStateUpdate(int stateCode, const char* pszStreamID) {
-     
+    printf("OnPlayStateUpdate stateCode %d streamId %d\n", stateCode,pszStreamID);
 }
 
 void MainWindow::OnPlayQualityUpdate(const char* pszStreamID,
