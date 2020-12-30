@@ -112,7 +112,6 @@ void MainWindow::EnterRoom() {
     // 设置房间回调
     LIVEROOM::SetRoomCallback(this);
 
-   
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
     ZGConfigHelperInstance()->SetVideoBitrate(256000);
@@ -121,7 +120,7 @@ void MainWindow::EnterRoom() {
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
-    LIVEROOM::SetRoomConfig(true, true);
+    LIVEROOM::SetRoomConfig(false, true);
 
     ZGManagerInstance()->InitSdk();
 }
@@ -179,8 +178,6 @@ void MainWindow::checkedMicDump(int state) {
         }
     }
 }
-
-
 
 void MainWindow::checkedSpeakerDump(int state) {
     curRemoteStreamId = ui->comboBoxRemote->currentText();
@@ -260,6 +257,13 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
             fwrite(pData,data_len,1,fileSpeaker);
         }
     }
+
+    if (ui->checkBoxDumpMic->checkState() == Qt::Checked) {
+        if (fileMic) {
+            fwrite(pData,data_len,1,fileMic);
+        }
+    }
+
 };
 
 // IRoom Callback  EnableMic SetAudioBitrate
@@ -267,11 +271,6 @@ void MainWindow::OnInitSDK(int nError) {
     printf("OnInitSDK error %d\n",nError);
     if (nError != 0)
         return;
-
-    //if (bFirstInit) {
-      //  bFirstInit = false;
-     //   return;
-   // }
     if (nError == 0) {
         std::string roomid = ui->lineEditRoomId->text().toStdString();
         if (ui->comboBoxRole->currentData().toInt() == 0) {
@@ -289,10 +288,26 @@ void MainWindow::on_pushButtonPull_clicked() {
     LIVEROOM::StartPlayingStream(str.c_str(), (void*)ui->label_2->winId());
 }
 
+void MainWindow::on_pushButtonDis_clicked() {
+    std::string str = ui->lineEditPushId->text().toStdString();
+    LIVEROOM::StopPlayingStream(str.c_str());
+}
+
+
 void MainWindow::StartPushlishToServer(QString ) {
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
-    if (ui->comboBoxRole->currentData().toInt() == 0) {
+    if (ui->comboBoxRole->currentData().toInt() == 0)
+    {
+        AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
+        if (ui->checkBoxMix->checkState() == Qt::Checked) {
+            publish_flag = AV::ZEGO_MIX_STREAM;
+        }
+        std::string streamID = ui->lineEditPushId->text().toStdString();
+        LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
+    }
+
+    if (ui->checkBoxAudience->checkState() == Qt::Checked) {
         AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
         std::string streamID = ui->lineEditPushId->text().toStdString();
         LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
@@ -406,7 +421,7 @@ void MainWindow::OnRecvCustomCommand(const char* pszUserId,
 void MainWindow::OnPublishStateUpdate(int stateCode,
     const char* pszStreamID,
     const ZegoPublishingStreamInfo& oStreamInfo) {
-   // printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n",stateCode,pszStreamID);
+    printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n",stateCode,pszStreamID);
     if (stateCode == 0)
     {
         printf("publish success stream Id %s \n",pszStreamID);
@@ -442,29 +457,29 @@ void MainWindow::OnPublishQulityUpdate(const char* pszStreamID,
     int quality,
     double videoFPS,
     double videoKBS) {
-   /// printf("OnPublishQulityUpdate\n");
+ 
 };
 void MainWindow::OnPublishQualityUpdate(const char* pszStreamID,
     ZegoPublishQuality publishQuality) {
-  //  printf("OnPublishQualityUpdate\n");
+  
 };
 
 void MainWindow::OnCaptureVideoSizeChanged(int nWidth, int nHeight) {
-   // printf("OnCaptureVideoSizeChanged\n");
+   
 };
 
 void MainWindow::OnCaptureVideoSizeChanged(AV::PublishChannelIndex index,
     int nWidth,
     int nHegith) {
-  //  printf("OnCaptureVideoSizeChanged\n");
+  
 };
 
 void MainWindow::OnPreviewSnapshot(void* pImage) {
-   // printf("OnPreviewSnapshot\n");
+   
 };
 
 void MainWindow::OnPreviewSnapshot(AV::PublishChannelIndex index, void* pImage) {
-   // printf("OnPreviewSnapshot\n");
+ 
 };
 
 void MainWindow::OnRelayCDNStateUpdate(const char* streamID,

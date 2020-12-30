@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_16">
+   <layout class="QHBoxLayout" name="horizontalLayout_8">
     <item>
      <widget class="QLabel" name="label_2">
       <property name="minimumSize">
@@ -151,24 +151,6 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
-            <item>
-             <widget class="QPushButton" name="pushButtonConnMic">
-              <property name="text">
-               <string>连麦</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButtonDiscMic">
-              <property name="text">
-               <string>断麦</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="label_3">
@@ -201,6 +183,13 @@
             <item>
              <widget class="QLineEdit" name="lineEditPushId"/>
             </item>
+            <item>
+             <widget class="QCheckBox" name="checkBoxMix">
+              <property name="text">
+               <string>是否进行混流</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -222,6 +211,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="checkBoxAudience">
+              <property name="text">
+               <string>观众是否推流</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -229,7 +225,14 @@
             <item>
              <widget class="QPushButton" name="pushButtonPull">
               <property name="text">
-               <string>PushButton</string>
+               <string>拉流</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonDis">
+              <property name="text">
+               <string>断流</string>
               </property>
              </widget>
             </item>

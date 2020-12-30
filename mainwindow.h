@@ -62,6 +62,7 @@ public slots:
     void on_pushButtonConnMic_clicked();
     void on_pushButtonLeave_clicked();
     void on_pushButtonPull_clicked();
+    void on_pushButtonDis_clicked();
     void currentIndexChangedRole(int index);
     void checkedAGC(int);
     void checkedANS(int);
