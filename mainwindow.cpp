@@ -114,6 +114,10 @@ void MainWindow::EnterRoom() {
     ZGConfigHelperInstance()->SetPublishResolution(640, 480);
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
+    LIVEROOM::SetRoomConfig(true, true);
+    int bpx = ui->lineEditAudiobps->text().toInt();
+    LIVEROOM::SetAudioBitrate(bpx);
+    AUDIOAUX::MuteAux(true);
 
     if (ui->comboBoxRole->currentData().toInt() == 0) {
         LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
@@ -122,10 +126,7 @@ void MainWindow::EnterRoom() {
     {
         LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
     }
-    LIVEROOM::SetRoomConfig(false, true);
-    int bpx = ui->lineEditAudiobps->text().toInt();
-    LIVEROOM::SetAudioBitrate(bpx);
-    AUDIOAUX::MuteAux(true);
+
 }
 
 void MainWindow::LeaveRoom() {
