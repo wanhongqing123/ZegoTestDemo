@@ -80,6 +80,15 @@ void MainWindow::on_pushButtonRoom_clicked() {
 }
 
 
+void MainWindow::on_pushButtonConnMic_clicked() {
+
+}
+
+void MainWindow::on_pushButtonLeave_clicked() {
+    LIVEROOM::StopPublishing();
+    LIVEROOM::LogoutRoom();
+}
+
 void MainWindow::oPrepCallback(const AudioFrame& inFrame, AudioFrame& outFrame) {
 
     printf("onPreCallback");
@@ -96,6 +105,10 @@ void MainWindow::OnLoginRoom(int errorCode,
     unsigned int streamCount) {
     if (errorCode == 0) {
         printf("Login RoomId %s Success\n", pszRoomID);
+        string stream_id = ZGHelper::Instance()->GetRandomUUID().c_str();
+        AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// Á¬Âó·½Ê½
+        LIVEROOM::StartPublishing("", stream_id.c_str(), publish_flag, "");
+
     }
     else {
         printf("Login RoomId %s failed \n", pszRoomID);
@@ -185,7 +198,7 @@ void MainWindow::OnPublishQulityUpdate(const char* pszStreamID,
     int quality,
     double videoFPS,
     double videoKBS) {
-    printf("OnPublishQulityUpdate\n");
+   /// printf("OnPublishQulityUpdate\n");
 };
 void MainWindow::OnPublishQualityUpdate(const char* pszStreamID,
     ZegoPublishQuality publishQuality) {

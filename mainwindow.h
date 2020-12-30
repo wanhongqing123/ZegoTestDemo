@@ -49,7 +49,8 @@ public slots:
     void on_pushButtonAEC_clicked();
     void on_pushButtonAGC_clicked();
     void on_pushButtonRoom_clicked();
-
+    void on_pushButtonConnMic_clicked();
+    void on_pushButtonLeave_clicked();
     static void oPrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
 
     // IRoom Callback
