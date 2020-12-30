@@ -57,7 +57,7 @@ void MainWindow::on_pushButtonAGC_clicked() {
 // VideoComm  ÊÓÆµÍ¨»°
 
 void MainWindow::on_pushButtonRoom_clicked() {
-    QString roomid = ui->lineEditRoomId->text();
+    std::string roomid = ui->lineEditRoomId->text().toStdString();
     std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
 
     LIVEROOM::SetUseTestEnv(true);
@@ -72,8 +72,8 @@ void MainWindow::on_pushButtonRoom_clicked() {
     ZGConfigHelperInstance()->SetPublishResolution(640, 480);
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
-
-    LIVEROOM::LoginRoom(device_uuid_.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
+    
+    LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
 
     LIVEROOM::SetRoomConfig(false ,true);
 
@@ -94,12 +94,11 @@ void MainWindow::OnLoginRoom(int errorCode,
     const char* pszRoomID,
     const ZegoStreamInfo* pStreamInfo,
     unsigned int streamCount) {
-
-    printf("OnLoginRoom error %d,RoomId %s,streamCount %d\n",
-        errorCode, pszRoomID,streamCount);
-
-    if (errorCode != 0) {
-       
+    if (errorCode == 0) {
+        printf("Login RoomId %s Success\n", pszRoomID);
+    }
+    else {
+        printf("Login RoomId %s failed \n", pszRoomID);
     }
 }
 
