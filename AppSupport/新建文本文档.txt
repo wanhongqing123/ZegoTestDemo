@@ -1,0 +1,19 @@
+  AppSupport/AppIDHelper.h
+        AppSupport/ZGConfigHelper.h \
+        AppSupport/ZGHelper.h \
+        AppSupport/ZGHttpClient.h \
+        AppSupport/ZGLOG.h \
+        AppSupport/ZGManager.h \
+        AppSupport/ZGTaskQueue.h \
+        AppSupport/ZGTimer.h
+
+
+   AppSupport/ZGHelper.cpp \
+        AppSupport/ZGHttpClient.cpp \
+        AppSupport/ZGLOG.cpp \
+        AppSupport/ZGManager.cpp \
+        AppSupport/ZGTaskQueue.cpp \
+        AppSupport/ZGTimer.cpp
+
+  $$PWD/libs/rapidjson \
+    $$PWD/libs/rapidjson/ \
