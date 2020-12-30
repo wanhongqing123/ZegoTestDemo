@@ -44,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->checkBoxAEC, SIGNAL(stateChanged(int)), this, SLOT(checkedAEC(int)));
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
     connect(ui->checkBoxAGC,SIGNAL(stateChanged(int)),this,SLOT(checkedAGC(int)));
+
+    connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
+    connect(this, SIGNAL(signal_del_remotestream(QString)),this,SLOT(del_remotestream(QString)),Qt::ConnectionType::QueuedConnection);
 }
 
 MainWindow::~MainWindow()
@@ -104,6 +107,8 @@ void MainWindow::on_pushButtonRoom_clicked() {
         LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
     }
     LIVEROOM::SetRoomConfig(false ,true);
+    layout = new QHBoxLayout(ui->widgetRemote);
+    ui->widgetRemote->setLayout(layout);
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
@@ -200,11 +205,42 @@ void MainWindow::OnTempBroken(int errorCode, const char* pszRoomID) {
     printf("OnTempBroken \n");
 };
 
+void MainWindow::add_remotestream(QString streamId) {
+    QWidget* it2 = remoteStreams.value(streamId);
+    std::string str = streamId.toStdString();
+    if (it2) {
+        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
+    }
+    else {
+        QWidget* it = new QWidget();
+        //it->resize( ,ui->widgetRemote->height()-10);
+        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
+        it->setMinimumHeight(ui->widgetRemote->height() - 10);
+        it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
+        layout->addWidget(it);
+        remoteStreams.insert(streamId, it);
+        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
+    }
+}
+void MainWindow::del_remotestream(QString streamId) {
+    QWidget* it = remoteStreams.value(streamId);
+    if (it)
+        delete it;
+    remoteStreams.remove(streamId);
+}
+
 void MainWindow::OnStreamUpdated(ZegoStreamUpdateType type,
     ZegoStreamInfo* pStreamInfo,
     unsigned int streamCount,
     const char* pszRoomID) {
     printf("OnStreamUpdated streamCount %d RoomId %s\n",streamCount,pszRoomID);
+    if (type == ZegoStreamUpdateType::StreamDeleted) {
+        emit signal_del_remotestream(QString(pStreamInfo->szStreamId));
+        
+    }
+    if (type == ZegoStreamUpdateType::StreamAdded) {
+        emit signal_add_remotestream(QString(pStreamInfo->szStreamId));
+    }
 };
 
 
@@ -232,7 +268,7 @@ void MainWindow::OnRecvCustomCommand(const char* pszUserId,
 void MainWindow::OnPublishStateUpdate(int stateCode,
     const char* pszStreamID,
     const ZegoPublishingStreamInfo& oStreamInfo) {
-    printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n",stateCode,pszStreamID);
+   // printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n",stateCode,pszStreamID);
 };
 
 void MainWindow::OnJoinLiveRequest(int seq,
@@ -323,7 +359,6 @@ void MainWindow::OnPlayQualityUpdate(const char* pszStreamID,
 
 void MainWindow::OnPlayQualityUpdate(const char* pszStreamID,
     ZegoPlayQuality playQuality) {
-    printf("OnPlayQualityUpdate \n");
 };
 
 void MainWindow::OnJoinLiveResponse(int result,

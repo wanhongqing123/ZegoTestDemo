@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <ZGLog.h>
-
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QMap>
 #include "ZegoLiveRoom/LiveRoom-Publisher.h"
 #include "ZegoLiveRoom/LiveRoom.h"
 #include "ZegoLiveRoom/LiveRoomCallback-Publisher.h"
@@ -43,8 +45,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void PrintToView(const char* log_str);
-
+signals:
+    void signal_add_remotestream(QString streamId);
+    void signal_del_remotestream(QString streamId);
 public slots:
+    void add_remotestream(QString streamId);
+    void del_remotestream(QString streamId);
     void on_pushButtonMic_clicked();
     void on_pushButtonCamera_clicked();
     void on_pushButtonANS_clicked();
@@ -170,6 +176,10 @@ private:
     bool bEnterRoom = false;
     QString bps = 64000;
     QString roomId;
+    QHBoxLayout* layout = nullptr;
+
+    QMap<QString, QWidget*> remoteStreams;
+
 };
 
 #endif // MAINWINDOW_H
