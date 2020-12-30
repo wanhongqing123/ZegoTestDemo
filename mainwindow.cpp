@@ -5,6 +5,8 @@
 #include "ZGConfigHelper.h"
 
 #include <QMessageBox>
+#include <QCheckBox>
+#include <QComboBox>
 //#define APPID 4094740804
 //#define TOKEN "0x5c,0x96,0x31,0x45,0xbf,0x41,0xcb,0x86,0xf7,0x17,0x7e,0x97,0xb4,0x13,0x94,0x8a,0x79,0x1c,0x46,0xc5,0x90,0x04,0x4a,0x35,0xa8,0xc8,0x62,0x8b,0xe6,0x2c,0x08,0x67"
 
@@ -38,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBoxSpeaker->addItem(QString::fromLocal8Bit(iter.device_name.c_str()), QString(iter.device_id.c_str()));
     }
 
+    connect(ui->checkBoxAEC, SIGNAL(stateChanged(int)), this, SLOT(checkedAEC(int)));
+    connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
+    connect(ui->checkBoxAGC,SIGNAL(stateChanged(int)),this,SLOT(checkedAGC(int)));
 }
 
 MainWindow::~MainWindow()
@@ -90,8 +95,13 @@ void MainWindow::on_pushButtonRoom_clicked() {
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
     
-    LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
-
+    if (ui->comboBoxRole->currentData().toInt() == 0) {
+        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor, device_uuid_.c_str());
+    }
+    else
+    {
+        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
+    }
     LIVEROOM::SetRoomConfig(false ,true);
 
 }
@@ -104,11 +114,32 @@ void MainWindow::on_pushButtonConnMic_clicked() {
 
 void MainWindow::currentIndexChangedRole(int index) {
 }
-void MainWindow::checkedAGC() {
+void MainWindow::checkedAGC(int state) {
+     auto st = ui->checkBoxAGC->checkState();
+     if (st == Qt::Checked) {
+         LIVEROOM::EnableAGC(true);
+     }
+     else {
+         LIVEROOM::EnableAGC(false);
+     }
 }
-void MainWindow::checkedANS() {
+void MainWindow::checkedANS(int state) {
+    auto st = ui->checkBoxANS->checkState();
+    if (st == Qt::Checked) {
+        LIVEROOM::EnableNoiseSuppress(true);
+    }
+    else {
+        LIVEROOM::EnableNoiseSuppress(false);
+    }
 }
-void MainWindow::checkedAEC() {
+void MainWindow::checkedAEC(int state) {
+    auto st = ui->checkBoxAEC->checkState();
+    if (st == Qt::Checked) {
+        LIVEROOM::EnableAEC(true);
+    }
+    else {
+        LIVEROOM::EnableAEC(false);
+    }
 }
 
 void MainWindow::on_pushButtonLeave_clicked() {
@@ -121,7 +152,7 @@ void MainWindow::oPrepCallback(const AudioFrame& inFrame, AudioFrame& outFrame) 
     printf("onPreCallback");
 }
 
-// IRoom Callback
+// IRoom Callback  EnableMic SetAudioBitrate
 void MainWindow::OnInitSDK(int nError) {
     printf("OnInitSDK error %d\n",nError);
 }
@@ -132,10 +163,12 @@ void MainWindow::OnLoginRoom(int errorCode,
     unsigned int streamCount) {
     if (errorCode == 0) {
         printf("Login RoomId %s Success\n", pszRoomID);
-        string stream_id = ZGHelper::Instance()->GetRandomUUID().c_str();
-        AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
-        LIVEROOM::StartPublishing("", stream_id.c_str(), publish_flag, "");
 
+        if (ui->comboBoxRole->currentData().toInt() == 0) {
+            string stream_id = ZGHelper::Instance()->GetRandomUUID().c_str();
+            AV::ZegoPublishFlag publish_flag = AV::ZEGO_JOIN_PUBLISH;// 连麦方式
+            LIVEROOM::StartPublishing("", stream_id.c_str(), publish_flag, "");
+        }
     }
     else {
         printf("Login RoomId %s failed \n", pszRoomID);

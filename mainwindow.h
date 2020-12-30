@@ -53,9 +53,9 @@ public slots:
     void on_pushButtonLeave_clicked();
 
     void currentIndexChangedRole(int index);
-    void checkedAGC();
-    void checkedANS();
-    void checkedAEC();
+    void checkedAGC(int);
+    void checkedANS(int);
+    void checkedAEC(int);
 
     static void oPrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
 
