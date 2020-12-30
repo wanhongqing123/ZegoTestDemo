@@ -11,10 +11,12 @@
 #include "ZegoLiveRoom/audio_in_output.h"
 #include "ZegoLiveRoom/LiveRoomCallback.h"
 #include "ZegoLiveRoom/LiveRoomCallback-Player.h"
-
+#include "ZegoLiveRoom/zego-api-audio-device.h"
+#include "ZegoLiveRoom/zego-api-audio-aux.h"
 using namespace ZEGO;
 using namespace ZEGO::LIVEROOM;
 using namespace AVE;
+using namespace AUDIOAUX;
 
 class IPushlishRoomCallback : public LIVEROOM::ILivePublisherCallback,
                               public LIVEROOM::IRoomCallback,

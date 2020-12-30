@@ -10,6 +10,7 @@
 //#define APPID 4094740804
 //#define TOKEN "0x5c,0x96,0x31,0x45,0xbf,0x41,0xcb,0x86,0xf7,0x17,0x7e,0x97,0xb4,0x13,0x94,0x8a,0x79,0x1c,0x46,0xc5,0x90,0x04,0x4a,0x35,0xa8,0xc8,0x62,0x8b,0xe6,0x2c,0x08,0x67"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -103,7 +104,9 @@ void MainWindow::on_pushButtonRoom_clicked() {
         LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
     }
     LIVEROOM::SetRoomConfig(false ,true);
-
+    int bpx = ui->lineEditAudiobps->text().toInt();
+    LIVEROOM::SetAudioBitrate(bpx);
+    AUDIOAUX::MuteAux(true);
 }
 
 
