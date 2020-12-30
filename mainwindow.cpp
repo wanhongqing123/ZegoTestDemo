@@ -12,33 +12,30 @@
 
 extern std::string GetExePath();;
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
 
-    LIVEROOM::SetUseTestEnv(true);
-    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
-
-    bool ret = ZGManagerInstance()->InitSdk();
-    if (ret) {
-        printf("Init Success\n");
-    }
-    else {
-        printf("Init Failed\n");
-    }
+    // bool ret = ZGManagerInstance()->InitSdk();
+    // if (ret) {
+     //    printf("Init Success\n");
+    // }
+    /// else {
+    //     printf("Init Failed\n");
+    // }
 
     ui->comboBoxRole->clear();
-    ui->comboBoxRole->addItem(QString::fromLocal8Bit("主播"),0);
-    ui->comboBoxRole->addItem(QString::fromLocal8Bit("观众"),1);
+    ui->comboBoxRole->addItem(QString::fromLocal8Bit("主播"), 0);
+    ui->comboBoxRole->addItem(QString::fromLocal8Bit("观众"), 1);
 
 
     std::vector<AudioDeviceInfo> vec = ZGConfigHelperInstance()->GetMicDevicesList();
     ui->comboBoxMic->clear();
     for (auto iter : vec) {
-        ui->comboBoxMic->addItem(QString::fromLocal8Bit(iter.device_name.c_str()),QString(iter.device_id.c_str()));
+        ui->comboBoxMic->addItem(QString::fromLocal8Bit(iter.device_name.c_str()), QString(iter.device_id.c_str()));
     }
 
     std::vector< AudioDeviceInfo> vec2 = ZGConfigHelperInstance()->GetSpeakerDevicesList();
@@ -47,25 +44,24 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->comboBoxMic, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexMicChanged(int)));
-    connect(ui->comboBoxSpeaker,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexSpeakerChanged(int)));
+    connect(ui->comboBoxSpeaker, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexSpeakerChanged(int)));
 
 
     connect(ui->checkBoxAEC, SIGNAL(stateChanged(int)), this, SLOT(checkedAEC(int)));
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
-    connect(ui->checkBoxAGC,SIGNAL(stateChanged(int)),this,SLOT(checkedAGC(int)));
+    connect(ui->checkBoxAGC, SIGNAL(stateChanged(int)), this, SLOT(checkedAGC(int)));
 
     connect(ui->checkBoxDumpMic, SIGNAL(stateChanged(int)), this, SLOT(checkedMicDump(int)));
-    connect(ui->checkBoxSpeaker,SIGNAL(stateChanged(int)),this,SLOT(checkedSpeakerDump(int)));
+    connect(ui->checkBoxSpeaker, SIGNAL(stateChanged(int)), this, SLOT(checkedSpeakerDump(int)));
     connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
-    connect(this, SIGNAL(signal_del_remotestream(QString)),this,SLOT(del_remotestream(QString)),Qt::ConnectionType::QueuedConnection);
-    connect(this, SIGNAL(signal_enterroom(QString)),this,SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
-    
+    connect(this, SIGNAL(signal_del_remotestream(QString)), this, SLOT(del_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
+    connect(this, SIGNAL(signal_enterroom(QString)), this, SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
+
     exePath = QString::fromStdString(GetExePath());
 
     layout = new QHBoxLayout(ui->widgetRemote);
     ui->widgetRemote->setLayout(layout);
-    LIVEROOM::EnableAGC(false);
-    LIVEROOM::EnableNoiseSuppress(false);
+
 }
 
 MainWindow::~MainWindow()
@@ -110,7 +106,10 @@ void MainWindow::on_pushButtonCamera_clicked() {
 
 void MainWindow::EnterRoom() {
     std::string roomid = ui->lineEditRoomId->text().toStdString();
+    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
 
+    LIVEROOM::SetUseTestEnv(true);
+    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
     // 设置推流回调
     LIVEROOM::SetLivePublisherCallback(this);
     // 设置拉流回调
@@ -121,22 +120,14 @@ void MainWindow::EnterRoom() {
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
     ZGConfigHelperInstance()->SetVideoBitrate(256000);
-  
+    LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
+    LIVEROOM::StartPreview();
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
     LIVEROOM::SetRoomConfig(false, true);
 
- 
-   if (ui->comboBoxRole->currentData().toInt() == 0) {
-        LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
-   }
-   else
-   {
-            LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
-   }
-   
-
+    ZGManagerInstance()->InitSdk();
 }
 
 void MainWindow::LeaveRoom() {
@@ -179,7 +170,7 @@ void MainWindow::currentIndexChangedRole(int index) {
 
 void MainWindow::checkedMicDump(int state) {
     if (state == Qt::Checked) {
-        
+
         if (fileMic) {
             fclose(fileMic);
             fileMic = nullptr;
@@ -188,10 +179,10 @@ void MainWindow::checkedMicDump(int state) {
             QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
             strFileId = exePath + "\\" + strFileId + "44khz_2_mic";
             std::string str = strFileId.toStdString();
-            fileMic = fopen(str.c_str(),"wb+");
+            fileMic = fopen(str.c_str(), "wb+");
         }
         LIVEROOM::EnableSelectedAudioRecord(ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_CAP,
-            44100,2);
+            44100, 2);
         LIVEROOM::SetAudioRecordCallback(this);
     }
     else {
@@ -232,13 +223,13 @@ void MainWindow::checkedSpeakerDump(int state) {
 }
 
 void MainWindow::checkedAGC(int state) {
-     auto st = ui->checkBoxAGC->checkState();
-     if (st == Qt::Checked) {
-         LIVEROOM::EnableAGC(true);
-     }
-     else {
-         LIVEROOM::EnableAGC(false);
-     }
+    auto st = ui->checkBoxAGC->checkState();
+    if (st == Qt::Checked) {
+        LIVEROOM::EnableAGC(true);
+    }
+    else {
+        LIVEROOM::EnableAGC(false);
+    }
 }
 void MainWindow::checkedANS(int state) {
     auto st = ui->checkBoxANS->checkState();
@@ -280,13 +271,13 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
     unsigned int type) {
     if (ui->checkBoxSpeaker->checkState() == Qt::Checked) {
         if (fileSpeaker) {
-            fwrite(pData,data_len,1,fileSpeaker);
+            fwrite(pData, data_len, 1, fileSpeaker);
         }
     }
 
     if (ui->checkBoxDumpMic->checkState() == Qt::Checked) {
         if (fileMic) {
-            fwrite(pData,data_len,1,fileMic);
+            fwrite(pData, data_len, 1, fileMic);
         }
     }
 
@@ -294,7 +285,19 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
 
 // IRoom Callback  EnableMic SetAudioBitrate
 void MainWindow::OnInitSDK(int nError) {
-    printf("OnInitSDK error %d\n",nError);
+    printf("OnInitSDK error %d\n", nError);
+    if (nError != 0)
+        return;
+    if (nError == 0) {
+        std::string roomid = ui->lineEditRoomId->text().toStdString();
+        if (ui->comboBoxRole->currentData().toInt() == 0) {
+            LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
+        }
+        else
+        {
+            LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
+        }
+    }
 }
 
 void MainWindow::on_pushButtonPull_clicked() {
@@ -308,7 +311,7 @@ void MainWindow::on_pushButtonDis_clicked() {
 }
 
 
-void MainWindow::StartPushlishToServer(QString ) {
+void MainWindow::StartPushlishToServer(QString) {
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
     if (ui->comboBoxRole->currentData().toInt() == 0)
@@ -342,21 +345,21 @@ void MainWindow::OnLoginRoom(int errorCode,
 }
 
 void MainWindow::OnLogoutRoom(int errorCode, const char* pszRoomID) {
-    printf("OnLogoutRoom error %d,RoomId %s\n",errorCode,pszRoomID);
+    printf("OnLogoutRoom error %d,RoomId %s\n", errorCode, pszRoomID);
 }
 
 void MainWindow::OnKickOut(int reason,
     const char* pszRoomID,
     const char* pszCustomReason) {
-    printf("reason %d,RoomId %s\n",reason, pszRoomID);
+    printf("reason %d,RoomId %s\n", reason, pszRoomID);
 };
 
 void MainWindow::OnDisconnect(int errorCode, const char* pszRoomID) {
-    printf("OnDisconnect errorCode %d RoomId %s\n",errorCode,pszRoomID);
+    printf("OnDisconnect errorCode %d RoomId %s\n", errorCode, pszRoomID);
 };
 
 void MainWindow::OnReconnect(int errorCode, const char* pszRoomID) {
-    printf("OnReconnect %d,RoomId %d\n",errorCode,pszRoomID);
+    printf("OnReconnect %d,RoomId %d\n", errorCode, pszRoomID);
 };
 
 void MainWindow::OnTempBroken(int errorCode, const char* pszRoomID) {
@@ -373,7 +376,7 @@ void MainWindow::add_remotestream(QString streamId) {
         QWidget* it = new QWidget();
         it->setMinimumWidth(100);
         it->setMinimumHeight(100);
-        it->setGeometry(100 * remoteStreams.size(),10,100,100);
+        it->setGeometry(100 * remoteStreams.size(), 10, 100, 100);
         layout->addWidget(it);
         remoteStreams.insert(streamId, it);
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
@@ -398,11 +401,11 @@ void MainWindow::OnStreamUpdated(ZegoStreamUpdateType type,
     ZegoStreamInfo* pStreamInfo,
     unsigned int streamCount,
     const char* pszRoomID) {
-    
+
     if (type == ZegoStreamUpdateType::StreamDeleted) {
         printf("OnStreamUpdated streamCount %d RoomId %s  Leave Room\n", streamCount, pszRoomID);
         emit signal_del_remotestream(QString(pStreamInfo->szStreamId));
-        
+
     }
     if (type == ZegoStreamUpdateType::StreamAdded) {
         printf("OnStreamUpdated streamCount %d RoomId %s  Enter Room\n", streamCount, pszRoomID);
@@ -435,10 +438,10 @@ void MainWindow::OnRecvCustomCommand(const char* pszUserId,
 void MainWindow::OnPublishStateUpdate(int stateCode,
     const char* pszStreamID,
     const ZegoPublishingStreamInfo& oStreamInfo) {
-    printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n",stateCode,pszStreamID);
+    printf("OnPublishStateUpdate stateCode %d,pszStreamID %s\n", stateCode, pszStreamID);
     if (stateCode == 0)
     {
-        printf("publish success stream Id %s \n",pszStreamID);
+        printf("publish success stream Id %s \n", pszStreamID);
     }
     else {
         printf("publish failed \n");
@@ -471,29 +474,29 @@ void MainWindow::OnPublishQulityUpdate(const char* pszStreamID,
     int quality,
     double videoFPS,
     double videoKBS) {
- 
+
 };
 void MainWindow::OnPublishQualityUpdate(const char* pszStreamID,
     ZegoPublishQuality publishQuality) {
-  
+
 };
 
 void MainWindow::OnCaptureVideoSizeChanged(int nWidth, int nHeight) {
-   
+
 };
 
 void MainWindow::OnCaptureVideoSizeChanged(AV::PublishChannelIndex index,
     int nWidth,
     int nHegith) {
-  
+
 };
 
 void MainWindow::OnPreviewSnapshot(void* pImage) {
-   
+
 };
 
 void MainWindow::OnPreviewSnapshot(AV::PublishChannelIndex index, void* pImage) {
- 
+
 };
 
 void MainWindow::OnRelayCDNStateUpdate(const char* streamID,
@@ -521,7 +524,7 @@ void MainWindow::OnCaptureAudioFirstFrame() {
 };
 
 void MainWindow::OnPlayStateUpdate(int stateCode, const char* pszStreamID) {
-    printf("OnPlayStateUpdate stateCode %d streamId %d\n", stateCode,pszStreamID);
+    printf("OnPlayStateUpdate stateCode %d streamId %d\n", stateCode, pszStreamID);
 }
 
 void MainWindow::OnPlayQualityUpdate(const char* pszStreamID,
