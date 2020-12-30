@@ -3,7 +3,7 @@
 #include "ZGManager.h"
 #include "ZGHelper.h"
 #include "ZGConfigHelper.h"
-
+#include "ZegoLiveRoom/zego-api-defines.h"
 #include <QMessageBox>
 #include <QCheckBox>
 #include <QComboBox>
@@ -111,7 +111,7 @@ void MainWindow::EnterRoom() {
     // 设置房间回调
     LIVEROOM::SetRoomCallback(this);
 
-   // LIVEROOM::SetAudioRecordCallback()
+   
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
     ZGConfigHelperInstance()->SetVideoBitrate(256000);
@@ -174,27 +174,14 @@ void MainWindow::checkedMicDump(int state) {
             std::string str = strFileId.toStdString();
             fileMic = fopen(str.c_str(),"wb+");
         }
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC->checkState() == Qt::Checked) {
-            set.bEncode = true;
-            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
+        LIVEROOM::EnableSelectedAudioRecord(ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_CAP,
+            44100,2);
+        LIVEROOM::SetAudioRecordCallback(this);
         //set.bEncode
-        LIVEROOM::SetAudioPrepCallback(&MainWindow::PrepCallback,set);
+       
     }
     else {
-        ExtPrepSet set;
-        set.bEncode = false;
-        if (ui->checkBoxAAC->checkState() == Qt::Checked) {
-            set.bEncode = true;
-            set.nChannel = 2;
-            set.nSampleRate = 44100;
-            set.nSamples = 441;
-        }
-        LIVEROOM::SetAudioPrepCallback(nullptr, set);
+        LIVEROOM::SetAudioRecordCallback(nullptr);
         if (fileMic) {
             fclose(fileMic);
         }
@@ -290,6 +277,14 @@ void MainWindow::PostpCallback(const char* streamId, const AudioFrame& inFrame, 
     printf("PostpCallback\n");
 }
 
+void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
+    int data_len,
+    int sample_rate,
+    int num_channels,
+    int bit_depth,
+    unsigned int type) {
+    printf("adsfasdfasdf");
+};
 
 // IRoom Callback  EnableMic SetAudioBitrate
 void MainWindow::OnInitSDK(int nError) {
