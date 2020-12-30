@@ -110,8 +110,6 @@ void MainWindow::EnterRoom() {
     LIVEROOM::SetLivePlayerCallback(this);
     // 设置房间回调
     LIVEROOM::SetRoomCallback(this);
-
-   // LIVEROOM::SetAudioRecordCallback()
     // 登录房间
     ZGConfigHelperInstance()->SetPublishResolution(190, 190);
     ZGConfigHelperInstance()->SetVideoBitrate(256000);
