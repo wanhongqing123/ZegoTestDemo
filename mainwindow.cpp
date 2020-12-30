@@ -294,24 +294,8 @@ void MainWindow::OnInitSDK(int nError) {
 }
 
 void MainWindow::on_pushButtonPull_clicked() {
-    QWidget* it2 = remoteStreams.value(ui->lineEditPushId->text());
     std::string str = ui->lineEditPushId->text().toStdString();
-    if (it2) {
-        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
-    }
-    else {
-        QWidget* it = new QWidget();
-        //it->resize( ,ui->widgetRemote->height()-10);
-        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
-        it->setMinimumHeight(ui->widgetRemote->height() - 10);
-        it->setGeometry(remoteStreams.size() * it->width(), 10, it->width(), it->height());
-        layout->addWidget(it);
-        // it->show();
-        remoteStreams.insert(ui->lineEditPushId->text(), it);
-        // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
-    }
-
-   
+    LIVEROOM::StartPlayingStream(str.c_str(), (void*)ui->label_2->winId());
 }
 
 void MainWindow::OnLoginRoom(int errorCode,
@@ -358,18 +342,16 @@ void MainWindow::add_remotestream(QString streamId) {
     QWidget* it2 = remoteStreams.value(streamId);
     std::string str = streamId.toStdString();
     if (it2) {
-       // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
+        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
     }
     else {
         QWidget* it = new QWidget();
-        //it->resize( ,ui->widgetRemote->height()-10);
-        it->setMinimumWidth(ui->widget->width() / (remoteStreams.size() + 1));
+        it->setMinimumWidth(ui->widgetRemote->width() / (remoteStreams.size() + 1));
         it->setMinimumHeight(ui->widgetRemote->height() - 10);
         it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
         layout->addWidget(it);
-       // it->show();
         remoteStreams.insert(streamId, it);
-       // LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
+        LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
     }
 
     ui->comboBoxRemote->addItem(streamId);
