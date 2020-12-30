@@ -52,6 +52,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(signal_del_remotestream(QString)),this,SLOT(del_remotestream(QString)),Qt::ConnectionType::QueuedConnection);
 
     exePath = QString::fromStdString(GetExePath());
+
+    layout = new QHBoxLayout(ui->widgetRemote);
+    ui->widgetRemote->setLayout(layout);
+  
 }
 
 MainWindow::~MainWindow()
@@ -119,8 +123,6 @@ void MainWindow::EnterRoom() {
         LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience, device_uuid_.c_str());
     }
     LIVEROOM::SetRoomConfig(false, true);
-    layout = new QHBoxLayout(ui->widgetRemote);
-    ui->widgetRemote->setLayout(layout);
     int bpx = ui->lineEditAudiobps->text().toInt();
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
@@ -151,8 +153,8 @@ void MainWindow::on_pushButtonConnMic_clicked() {
 
 
 void MainWindow::currentIndexChangedRole(int index) {
-    LeaveRoom();
-    EnterRoom();
+    //LeaveRoom();
+    //EnterRoom();
 }
 
 void MainWindow::checkedMicDump(int state) {
@@ -340,6 +342,7 @@ void MainWindow::add_remotestream(QString streamId) {
         it->setMinimumHeight(ui->widgetRemote->height() - 10);
         it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
         layout->addWidget(it);
+        it->show();
         remoteStreams.insert(streamId, it);
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
     }
@@ -347,6 +350,8 @@ void MainWindow::add_remotestream(QString streamId) {
     ui->comboBoxRemote->addItem(streamId);
 }
 void MainWindow::del_remotestream(QString streamId) {
+    std::string id = streamId.toStdString();
+    LIVEROOM::StopPlayingStream(id.c_str());
     QWidget* it = remoteStreams.value(streamId);
     if (it)
         delete it;
@@ -361,12 +366,14 @@ void MainWindow::OnStreamUpdated(ZegoStreamUpdateType type,
     ZegoStreamInfo* pStreamInfo,
     unsigned int streamCount,
     const char* pszRoomID) {
-    printf("OnStreamUpdated streamCount %d RoomId %s\n",streamCount,pszRoomID);
+    
     if (type == ZegoStreamUpdateType::StreamDeleted) {
+        printf("OnStreamUpdated streamCount %d RoomId %s  Leave Room\n", streamCount, pszRoomID);
         emit signal_del_remotestream(QString(pStreamInfo->szStreamId));
         
     }
     if (type == ZegoStreamUpdateType::StreamAdded) {
+        printf("OnStreamUpdated streamCount %d RoomId %s  Enter Room\n", streamCount, pszRoomID);
         emit signal_add_remotestream(QString(pStreamInfo->szStreamId));
     }
 };
