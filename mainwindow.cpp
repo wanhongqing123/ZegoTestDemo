@@ -346,9 +346,9 @@ void MainWindow::add_remotestream(QString streamId) {
     }
     else {
         QWidget* it = new QWidget();
-        it->setMinimumWidth(ui->widgetRemote->width() / (remoteStreams.size() + 1));
-        it->setMinimumHeight(ui->widgetRemote->height() - 10);
-        it->setGeometry(remoteStreams.size() * it->width(),10,it->width(),it->height());
+        it->setMinimumWidth(100);
+        it->setMinimumHeight(100);
+        it->setGeometry(100 * remoteStreams.size(),10,100,100);
         layout->addWidget(it);
         remoteStreams.insert(streamId, it);
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
