@@ -53,9 +53,6 @@ public slots:
     void del_remotestream(QString streamId);
     void on_pushButtonMic_clicked();
     void on_pushButtonCamera_clicked();
-    void on_pushButtonANS_clicked();
-    void on_pushButtonAEC_clicked();
-    void on_pushButtonAGC_clicked();
     void on_pushButtonRoom_clicked();
     void on_pushButtonConnMic_clicked();
     void on_pushButtonLeave_clicked();
@@ -65,7 +62,15 @@ public slots:
     void checkedANS(int);
     void checkedAEC(int);
 
-    static void oPrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
+    void checkedMicDump(int);
+    void checkedSpeakerDump(int);
+public:
+    void EnterRoom();
+    void LeaveRoom();
+public:
+
+    static void PrepCallback(const AudioFrame& inFrame,AudioFrame& outFrame);
+    static void PostpCallback(const char* streamId, const AudioFrame& inFrame, AudioFrame& outFrame);
 
     // IRoom Callback
     void OnInitSDK(int nError)override;
@@ -169,7 +174,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     bool bMic = false;
-    bool bCamera = false;
+    bool bCamera = true;
     bool bANS = false;
     bool bAEC = false;
     bool bAGC = false;
@@ -177,9 +182,11 @@ private:
     QString bps = 64000;
     QString roomId;
     QHBoxLayout* layout = nullptr;
-
     QMap<QString, QWidget*> remoteStreams;
-
+    QString exePath;
+    FILE* fileMic = nullptr;
+    FILE* fileSpeaker = nullptr;
+    QString curRemoteStreamId;
 };
 
 #endif // MAINWINDOW_H

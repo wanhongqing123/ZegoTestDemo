@@ -193,6 +193,7 @@ bool FileExist(string file_path)
     }
     else
     {
+        file.close();
         return true;
     }
 }
