@@ -43,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBoxSpeaker->addItem(QString::fromLocal8Bit(iter.device_name.c_str()), QString(iter.device_id.c_str()));
     }
 
+    connect(ui->comboBoxMic, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexMicChanged(int)));
+    connect(ui->comboBoxSpeaker,SIGNAL(currentIndexChanged(int)),this,SLOT(currentIndexSpeakerChanged(int)));
+
+
     connect(ui->checkBoxAEC, SIGNAL(stateChanged(int)), this, SLOT(checkedAEC(int)));
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
     connect(ui->checkBoxAGC,SIGNAL(stateChanged(int)),this,SLOT(checkedAGC(int)));
@@ -52,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_del_remotestream(QString)),this,SLOT(del_remotestream(QString)),Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_enterroom(QString)),this,SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
+    
     exePath = QString::fromStdString(GetExePath());
 
     layout = new QHBoxLayout(ui->widgetRemote);
@@ -148,7 +153,15 @@ void MainWindow::on_pushButtonRoom_clicked() {
 void MainWindow::on_pushButtonConnMic_clicked() {
 
 }
+void MainWindow::currentIndexMicChanged(int index) {
+    QString id = ui->comboBoxMic->currentData().toString();
+    ZGConfigHelperInstance()->SetMicDevice(id.toStdString());
+}
 
+void MainWindow::currentIndexSpeakerChanged(int index) {
+    QString id = ui->comboBoxSpeaker->currentData().toString();
+    ZGConfigHelperInstance()->SetSpeakerDevice(id.toStdString());
+}
 
 void MainWindow::currentIndexChangedRole(int index) {
     //LeaveRoom();
@@ -160,6 +173,7 @@ void MainWindow::checkedMicDump(int state) {
         
         if (fileMic) {
             fclose(fileMic);
+            fileMic = nullptr;
         }
         else {
             QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
@@ -175,6 +189,7 @@ void MainWindow::checkedMicDump(int state) {
         LIVEROOM::SetAudioRecordCallback(nullptr);
         if (fileMic) {
             fclose(fileMic);
+            fileMic = nullptr;
         }
     }
 }
@@ -186,6 +201,7 @@ void MainWindow::checkedSpeakerDump(int state) {
 
         if (fileSpeaker) {
             fclose(fileSpeaker);
+            fileSpeaker = nullptr;
         }
         else {
             QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
@@ -201,6 +217,7 @@ void MainWindow::checkedSpeakerDump(int state) {
         LIVEROOM::SetAudioRecordCallback(nullptr);
         if (fileSpeaker) {
             fclose(fileSpeaker);
+            fileSpeaker = nullptr;
         }
     }
 }
