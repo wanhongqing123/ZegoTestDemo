@@ -101,6 +101,10 @@ void MainWindow::on_pushButtonCamera_clicked() {
 
 void MainWindow::EnterRoom() {
     std::string roomid = ui->lineEditRoomId->text().toStdString();
+    std::string device_uuid_ = ZGHelperInstance()->GetDeviceUUID();
+
+    LIVEROOM::SetUseTestEnv(true);
+    LIVEROOM::SetUser(device_uuid_.c_str(), device_uuid_.c_str());
     // 设置推流回调
     LIVEROOM::SetLivePublisherCallback(this);
     // 设置拉流回调
