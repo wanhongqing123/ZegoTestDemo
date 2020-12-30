@@ -173,7 +173,7 @@ public:
     void OnSnapshot(void* pImage, const char* pszStreamID) override;
 private:
     Ui::MainWindow *ui;
-    bool bMic = false;
+    bool bMic = true;
     bool bCamera = true;
     bool bANS = false;
     bool bAEC = false;
