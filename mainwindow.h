@@ -70,7 +70,8 @@ public slots:
     void checkedANS(int);
     void checkedAEC(int);
    
-    void checkedMicDump(int);
+    void checkedMicDump();
+    void checkedMicCaptureDump();
     void checkedSpeakerDump(int);
     void StartPushlishToServer(QString);
 public:
@@ -201,6 +202,8 @@ private:
     QMap<QString, QWidget*> remoteStreams;
     QString exePath;
     FILE* fileMic = nullptr;
+    static FILE* fileMicCapture;
+    static bool isPrintCaptureInfo;
     FILE* fileSpeaker = nullptr;
     QString curRemoteStreamId;
     bool bFirstInit = true;

@@ -264,29 +264,28 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QCheckBox" name="checkBoxAAC2">
-              <property name="text">
-               <string>是否编码</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <widget class="QCheckBox" name="checkBoxDumpMic">
+             <widget class="QRadioButton" name="radioButtonDumpMic">
               <property name="text">
-               <string>dump麦克风数据（推流前调用）</string>
+               <string>dump麦克风采集</string>
               </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup</string>
+              </attribute>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBoxAAC">
+             <widget class="QRadioButton" name="radioButtonEngine">
               <property name="text">
-               <string>是否编码</string>
+               <string>dump音频处理后</string>
               </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup</string>
+              </attribute>
              </widget>
             </item>
            </layout>
@@ -396,27 +395,6 @@
             </item>
            </layout>
           </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>编码参数</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboBoxParam">
-              <property name="minimumSize">
-               <size>
-                <width>120</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
          </layout>
         </widget>
        </item>
@@ -461,4 +439,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

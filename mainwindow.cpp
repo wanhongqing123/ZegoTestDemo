@@ -51,8 +51,11 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
     connect(ui->checkBoxAGC, SIGNAL(stateChanged(int)), this, SLOT(checkedAGC(int)));
 
-    connect(ui->checkBoxDumpMic, SIGNAL(stateChanged(int)), this, SLOT(checkedMicDump(int)));
+    connect(ui->radioButtonEngine, SIGNAL(clicked()), this, SLOT(checkedMicDump()));
+    connect(ui->radioButtonDumpMic, SIGNAL(clicked()), this, SLOT(checkedMicCaptureDump()));
+
     connect(ui->checkBoxSpeaker, SIGNAL(stateChanged(int)), this, SLOT(checkedSpeakerDump(int)));
+
     connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_del_remotestream(QString)), this, SLOT(del_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_enterroom(QString)), this, SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
@@ -127,6 +130,16 @@ void MainWindow::EnterRoom() {
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
     LIVEROOM::SetRoomConfig(false, true);
+    LIVEROOM::EnableAGC(false);
+    LIVEROOM::EnableNoiseSuppress(false);
+
+    if (ui->checkBoxAGC->checkState() == Qt::Checked) {
+        LIVEROOM::EnableAGC(true);
+    }
+    if (ui->checkBoxANS->checkState() == Qt::Checked) {
+        LIVEROOM::EnableNoiseSuppress(true);
+    }
+
 
     ZGManagerInstance()->InitSdk();
 }
@@ -169,8 +182,8 @@ void MainWindow::currentIndexChangedRole(int index) {
     //EnterRoom();
 }
 
-void MainWindow::checkedMicDump(int state) {
-    if (state == Qt::Checked) {
+void MainWindow::checkedMicDump() {
+    if (ui->radioButtonEngine->isChecked()) {
 
         if (fileMic) {
             fclose(fileMic);
@@ -193,6 +206,37 @@ void MainWindow::checkedMicDump(int state) {
             fileMic = nullptr;
         }
     }
+}
+
+void  MainWindow::checkedMicCaptureDump() {
+    ExtPrepSet set;
+    set.bEncode = false;
+    set.nChannel = 0;
+    set.nSampleRate = 0;
+    set.nSamples = 0;
+    if (ui->radioButtonDumpMic->isChecked()) {
+        if (fileMicCapture) {
+            fclose(fileMicCapture);
+            fileMicCapture = nullptr;
+        }
+        else {
+            QString strFileId = QString::number(ZGHelperInstance()->GetCurTimeStampMs());
+            strFileId = exePath + "\\" + strFileId + "44khz_2_micpture";
+            std::string str = strFileId.toStdString();
+            fileMicCapture = fopen(str.c_str(), "wb+");
+            isPrintCaptureInfo = true;
+        }
+        LIVEROOM::SetAudioPrep2(&MainWindow::PrepCallback,set);
+    }
+    else {
+        LIVEROOM::SetAudioPrep2(nullptr,set);
+        if (fileMicCapture) {
+            fclose(fileMicCapture);
+            fileMicCapture = nullptr;
+            isPrintCaptureInfo = false;
+        }
+    }
+
 }
 
 void MainWindow::checkedSpeakerDump(int state) {
@@ -255,13 +299,24 @@ void MainWindow::on_pushButtonLeave_clicked() {
     LeaveRoom();
 }
 
-void MainWindow::PrepCallback(const AudioFrame& inFrame, AudioFrame& outFrame) {
-
-    printf("onPreCallback\n");
-}
 
 void MainWindow::PostpCallback(const char* streamId, const AudioFrame& inFrame, AudioFrame& outFrame) {
     printf("PostpCallback\n");
+}
+
+FILE* MainWindow::fileMicCapture = nullptr;
+bool MainWindow::isPrintCaptureInfo = true;
+
+void MainWindow::PrepCallback(const AudioFrame& inFrame, AudioFrame& outFrame) {
+    
+    if (fileMicCapture) {
+        if (isPrintCaptureInfo) {
+            printf("samplerate-channels-%d-%d-16bit\n",inFrame.sampleRate,
+                inFrame.channels);
+            isPrintCaptureInfo = false;
+        }
+        fwrite(inFrame.buffer, inFrame.bufLen,1,fileMicCapture);
+    }
 }
 
 void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
@@ -275,8 +330,7 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
             fwrite(pData, data_len, 1, fileSpeaker);
         }
     }
-
-    if (ui->checkBoxDumpMic->checkState() == Qt::Checked) {
+    if (ui->radioButtonEngine->isChecked()) {
         if (fileMic) {
             fwrite(pData, data_len, 1, fileMic);
         }
