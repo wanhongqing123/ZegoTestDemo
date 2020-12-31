@@ -332,7 +332,7 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
         }
     }
     if (ui->checkBoxEngine->checkState() == Qt::Checked &&
-        type == type == ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_RENDER) {
+        type == type == ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_CAP) {
         if (fileMic) {
             fwrite(pData, data_len, 1, fileMic);
         }
