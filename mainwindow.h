@@ -70,8 +70,8 @@ public slots:
     void checkedANS(int);
     void checkedAEC(int);
    
-    void checkedMicDump();
-    void checkedMicCaptureDump();
+    void checkedMicDump(int);
+    void checkedMicCaptureDump(int);
     void checkedSpeakerDump(int);
     void StartPushlishToServer(QString);
 public:

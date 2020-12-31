@@ -51,8 +51,8 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
     connect(ui->checkBoxAGC, SIGNAL(stateChanged(int)), this, SLOT(checkedAGC(int)));
 
-    connect(ui->radioButtonEngine, SIGNAL(clicked()), this, SLOT(checkedMicDump()));
-    connect(ui->radioButtonDumpMic, SIGNAL(clicked()), this, SLOT(checkedMicCaptureDump()));
+    connect(ui->checkBoxEngine, SIGNAL(stateChanged(int)), this, SLOT(checkedMicDump(int)));
+    connect(ui->checkBoxMic, SIGNAL(stateChanged(int)), this, SLOT(checkedMicCaptureDump(int)));
 
     connect(ui->checkBoxSpeaker, SIGNAL(stateChanged(int)), this, SLOT(checkedSpeakerDump(int)));
 
@@ -182,8 +182,8 @@ void MainWindow::currentIndexChangedRole(int index) {
     //EnterRoom();
 }
 
-void MainWindow::checkedMicDump() {
-    if (ui->radioButtonEngine->isChecked()) {
+void MainWindow::checkedMicDump(int state) {
+    if (state == Qt::Checked) {
 
         if (fileMic) {
             fclose(fileMic);
@@ -208,13 +208,13 @@ void MainWindow::checkedMicDump() {
     }
 }
 
-void  MainWindow::checkedMicCaptureDump() {
+void  MainWindow::checkedMicCaptureDump(int state) {
     ExtPrepSet set;
     set.bEncode = false;
     set.nChannel = 0;
     set.nSampleRate = 0;
     set.nSamples = 0;
-    if (ui->radioButtonDumpMic->isChecked()) {
+    if (state == Qt::Checked) {
         if (fileMicCapture) {
             fclose(fileMicCapture);
             fileMicCapture = nullptr;
@@ -325,12 +325,14 @@ void MainWindow::OnAudioRecordCallback(const unsigned char* pData,
     int num_channels,
     int bit_depth,
     unsigned int type) {
-    if (ui->checkBoxSpeaker->checkState() == Qt::Checked) {
+    if (ui->checkBoxSpeaker->checkState() == Qt::Checked &&
+        type == ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_RENDER) {
         if (fileSpeaker) {
             fwrite(pData, data_len, 1, fileSpeaker);
         }
     }
-    if (ui->radioButtonEngine->isChecked()) {
+    if (ui->checkBoxEngine->checkState() == Qt::Checked &&
+        type == type == ZEGO::AV::ZegoAVAPIAudioRecordMask::ZEGO_AUDIO_RECORD_RENDER) {
         if (fileMic) {
             fwrite(pData, data_len, 1, fileMic);
         }

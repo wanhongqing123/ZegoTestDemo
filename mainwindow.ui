@@ -269,23 +269,17 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <widget class="QRadioButton" name="radioButtonDumpMic">
+             <widget class="QCheckBox" name="checkBoxEngine">
               <property name="text">
-               <string>dump麦克风采集</string>
+               <string>dump mic Engine数据</string>
               </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup</string>
-              </attribute>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButtonEngine">
+             <widget class="QCheckBox" name="checkBoxMic">
               <property name="text">
-               <string>dump音频处理后</string>
+               <string>dump麦克风数据</string>
               </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup</string>
-              </attribute>
              </widget>
             </item>
            </layout>
@@ -439,7 +433,4 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>
