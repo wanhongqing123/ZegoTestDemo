@@ -302,12 +302,12 @@ void MainWindow::OnInitSDK(int nError) {
 }
 
 void MainWindow::on_pushButtonPull_clicked() {
-    std::string str = ui->lineEditPushId->text().toStdString();
+    std::string str = ui->lineEditPullId->text().toStdString();
     LIVEROOM::StartPlayingStream(str.c_str(), (void*)ui->label_2->winId());
 }
 
 void MainWindow::on_pushButtonDis_clicked() {
-    std::string str = ui->lineEditPushId->text().toStdString();
+    std::string str = ui->lineEditPullId->text().toStdString();
     LIVEROOM::StopPlayingStream(str.c_str());
 }
 

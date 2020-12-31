@@ -41,3 +41,13 @@ release/
 *.vcxproj.user
 *.pro.user
 ui_*.h
+
+
+/package/*_2_mic
+/package/*_2_speaker
+/package/zegotest.exe
+
+
+
+
+
