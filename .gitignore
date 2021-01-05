@@ -24,6 +24,7 @@ moc_*.h
 /debug32/
 /debug64/
 /builds/
+/run-install/
 .vs/
 *.o.d
 *.ninja

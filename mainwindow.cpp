@@ -359,12 +359,12 @@ void MainWindow::OnInitSDK(int nError) {
 
 void MainWindow::on_pushButtonPull_clicked() {
     std::string str = ui->lineEditPullId->text().toStdString();
-    LIVEROOM::StartPlayingStream(str.c_str(), (void*)ui->label_2->winId());
+    add_remotestream(str.c_str());
 }
 
 void MainWindow::on_pushButtonDis_clicked() {
     std::string str = ui->lineEditPullId->text().toStdString();
-    LIVEROOM::StopPlayingStream(str.c_str());
+    del_remotestream(str.c_str());
 }
 
 
@@ -428,6 +428,7 @@ void MainWindow::add_remotestream(QString streamId) {
     std::string str = streamId.toStdString();
     if (it2) {
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it2->winId());
+        LIVEROOM::ActivateAudioPlayStream(str.c_str(), true);
     }
     else {
         QWidget* it = new QWidget();
@@ -436,7 +437,9 @@ void MainWindow::add_remotestream(QString streamId) {
         it->setGeometry(100 * remoteStreams.size(), 10, 100, 100);
         layout->addWidget(it);
         remoteStreams.insert(streamId, it);
+        LIVEROOM::StopPlayingStream(str.c_str());
         LIVEROOM::StartPlayingStream(str.c_str(), (void*)it->winId());
+        LIVEROOM::ActivateAudioPlayStream(str.c_str(), true);
     }
 
     ui->comboBoxRemote->addItem(streamId);
@@ -461,12 +464,12 @@ void MainWindow::OnStreamUpdated(ZegoStreamUpdateType type,
 
     if (type == ZegoStreamUpdateType::StreamDeleted) {
         printf("OnStreamUpdated streamCount %d RoomId %s  Leave Room\n", streamCount, pszRoomID);
-        emit signal_del_remotestream(QString(pStreamInfo->szStreamId));
+        //emit signal_del_remotestream(QString(pStreamInfo->szStreamId));
 
     }
     if (type == ZegoStreamUpdateType::StreamAdded) {
         printf("OnStreamUpdated streamCount %d RoomId %s  Enter Room\n", streamCount, pszRoomID);
-        emit signal_add_remotestream(QString(pStreamInfo->szStreamId));
+        //emit signal_add_remotestream(QString(pStreamInfo->szStreamId));
     }
 };
 
