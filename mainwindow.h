@@ -16,11 +16,15 @@
 #include "ZegoLiveRoom/zego-api-audio-device.h"
 #include "ZegoLiveRoom/zego-api-audio-aux.h"
 #include "ZegoLiveRoom/AVDefines.h"
+#include "ZegoLiveRoom/zego-api-mix-stream.h"
+
 
 using namespace ZEGO;
 using namespace ZEGO::LIVEROOM;
 using namespace AVE;
 using namespace AUDIOAUX;
+using namespace ZEGO::MIXSTREAM;
+
 //using namespace ZEGO::AV;
 
 class IPushlishRoomCallback : public LIVEROOM::ILivePublisherCallback,
@@ -41,7 +45,8 @@ class MainWindow : public QMainWindow,
                    public IRoomCallback,
                    public ILivePublisherCallback,
                    public ILivePlayerCallback,
-                   public  ZEGO::AV::IZegoAudioRecordCallback
+                   public  ZEGO::AV::IZegoAudioRecordCallback,
+                   public IZegoMixStreamExCallback
 {
     Q_OBJECT
 
@@ -74,6 +79,7 @@ public slots:
     void checkedMicCaptureDump(int);
     void checkedSpeakerDump(int);
     void StartPushlishToServer(QString);
+    void on_pushButtonMix_clicked();
 public:
     void EnterRoom();
     void LeaveRoom();
@@ -188,6 +194,12 @@ public:
     void OnRecvRemoteVideoFirstFrame(const char* pStreamID) override;
     void OnRenderRemoteVideoFirstFrame(const char* pStreamID) override;
     void OnSnapshot(void* pImage, const char* pszStreamID) override;
+
+    // MixCallback
+    void OnMixStreamEx(const AV::ZegoMixStreamResultEx& result, const char* mixStreamID, int seq) override;
+    void OnMixStreamRelayCDNStateUpdate(const char* mixStreamID,
+        AV::ZegoStreamRelayCDNInfo* statesInfo,
+        unsigned int statesInfoCount) override;
 private:
     Ui::MainWindow *ui;
     bool bMic = true;

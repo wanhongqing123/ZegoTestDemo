@@ -77,7 +77,7 @@ MainWindow::~MainWindow()
 
 void  MainWindow::PrintToView(const char* log_str) {
     if (!log_str) {
-        ui->label_2->setText(QString::fromStdString(log_str));
+        //ui->label_2->setText(QString::fromStdString(log_str));
     }
 }
 
@@ -107,6 +107,50 @@ void MainWindow::on_pushButtonCamera_clicked() {
     bCamera = !bCamera;
 }
 
+
+void MainWindow::on_pushButtonMix_clicked() {
+    MIXSTREAM::SetMixStreamExCallback(this);
+    ZegoMixStreamConfig config;
+    config.bSingleStreamPassThrough = true;
+    config.bWithSoundLevel = false;
+    config.nChannels = 2;
+    config.nOutputAudioBitrate = 64000;
+    config.nInputStreamCount = 2;
+    config.nOutputStreamCount = 1;
+    config.nOutputFps = 15;
+    config.nOutputBitrate = 512 * 1000;
+    config.nOutputWidth = 100;
+    config.nOutputHeight = 100;
+    ZegoMixStreamInput* input = new ZegoMixStreamInput();
+    config.pInputStreamList = input;
+   // config.
+    std::string strId = ui->lineEditPushId->text().toStdString();
+    strcpy(input->szStreamID, strId.c_str());
+    
+   int ret =  MIXSTREAM::MixStreamEx("hongqingwan",config);
+   printf("MixStream Error %d\n",ret);
+}
+
+
+void MainWindow::OnMixStreamEx(const AV::ZegoMixStreamResultEx& result, 
+    const char* mixStreamID, 
+    int seq) {
+    printf("MixStream ID %s\n", mixStreamID);
+    printf("seq %d\n",seq);
+    printf("=========StreamResult===========\n");
+    printf("nNonExistsStreamCount %d,nStreamInfoCount %d,Error %d\n",result.nNonExistsStreamCount,
+        result.nStreamInfoCount,result.uiErrorCode);
+
+    for (int i = 0; i < result.nStreamInfoCount; ++i) {
+        printf("szStreamID %s, MixStreamId %s,uiRtmpUrl Count %d\n", result.pStreamInfoList->szStreamID,
+            result.pStreamInfoList->szMixStreamID, result.pStreamInfoList->uiRtmpURLCount);
+    }
+}
+void MainWindow::OnMixStreamRelayCDNStateUpdate(const char* mixStreamID,
+    AV::ZegoStreamRelayCDNInfo* statesInfo,
+    unsigned int statesInfoCount) {
+
+}
 
 void MainWindow::EnterRoom() {
     std::string roomid = ui->lineEditRoomId->text().toStdString();
@@ -400,6 +444,10 @@ void MainWindow::OnLoginRoom(int errorCode,
         printf("Login RoomId %s failed \n", pszRoomID);
     }
 }
+
+
+// »ìÁ÷ ²Î¿¼ https://doc-zh.zego.im/zh/1728.html
+
 
 void MainWindow::OnLogoutRoom(int errorCode, const char* pszRoomID) {
     printf("OnLogoutRoom error %d,RoomId %s\n", errorCode, pszRoomID);
