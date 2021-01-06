@@ -632,7 +632,7 @@ void MainWindow::OnCaptureAudioFirstFrame() {
 };
 
 void MainWindow::OnPlayStateUpdate(int stateCode, const char* pszStreamID) {
-    printf("OnPlayStateUpdate stateCode %d streamId %d\n", stateCode, pszStreamID);
+    printf("OnPlayStateUpdate stateCode %d streamId %s\n", stateCode, pszStreamID);
 }
 
 void MainWindow::OnPlayQualityUpdate(const char* pszStreamID,
