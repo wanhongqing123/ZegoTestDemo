@@ -174,17 +174,19 @@ void MainWindow::EnterRoom() {
     LIVEROOM::SetAudioBitrate(bpx);
     AUDIOAUX::MuteAux(true);
     LIVEROOM::SetRoomConfig(false, true);
+
     LIVEROOM::EnableAGC(false);
     LIVEROOM::EnableNoiseSuppress(false);
-
+    LIVEROOM::EnableAEC(false);
     if (ui->checkBoxAGC->checkState() == Qt::Checked) {
         LIVEROOM::EnableAGC(true);
     }
     if (ui->checkBoxANS->checkState() == Qt::Checked) {
         LIVEROOM::EnableNoiseSuppress(true);
     }
-
-
+    if (ui->checkBoxAEC->checkState() == Qt::Checked) {
+        LIVEROOM::EnableAEC(true);
+    }
     ZGManagerInstance()->InitSdk();
 }
 
@@ -389,6 +391,19 @@ void MainWindow::OnInitSDK(int nError) {
     printf("OnInitSDK error %d\n", nError);
     if (nError != 0)
         return;
+
+    LIVEROOM::EnableAGC(false);
+    LIVEROOM::EnableNoiseSuppress(false);
+    LIVEROOM::EnableAEC(false);
+    if (ui->checkBoxAGC->checkState() == Qt::Checked) {
+        LIVEROOM::EnableAGC(true);
+    }
+    if (ui->checkBoxANS->checkState() == Qt::Checked) {
+        LIVEROOM::EnableNoiseSuppress(true);
+    }
+    if (ui->checkBoxAEC->checkState() == Qt::Checked) {
+        LIVEROOM::EnableAEC(true);
+    }
     if (nError == 0) {
         std::string roomid = ui->lineEditRoomId->text().toStdString();
         if (ui->comboBoxRole->currentData().toInt() == 0) {
