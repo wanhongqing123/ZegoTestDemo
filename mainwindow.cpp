@@ -43,9 +43,15 @@ MainWindow::MainWindow(QWidget* parent) :
         ui->comboBoxSpeaker->addItem(QString::fromLocal8Bit(iter.device_name.c_str()), QString(iter.device_id.c_str()));
     }
 
+    ui->comboBoxCamera->clear();
+    std::vector<VideoDeviceInfo> vec3 = ZGConfigHelperInstance()->GetVideoDevicesList();
+    for (auto iter : vec3) {
+        ui->comboBoxCamera->addItem(QString::fromLocal8Bit(iter.device_name.c_str()),QString(iter.device_id.c_str()));
+    }
+
     connect(ui->comboBoxMic, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexMicChanged(int)));
     connect(ui->comboBoxSpeaker, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexSpeakerChanged(int)));
-
+    connect(ui->comboBoxCamera, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexCamera(int)));
 
     connect(ui->checkBoxAEC, SIGNAL(stateChanged(int)), this, SLOT(checkedAEC(int)));
     connect(ui->checkBoxANS, SIGNAL(stateChanged(int)), this, SLOT(checkedANS(int)));
@@ -55,7 +61,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->checkBoxMic, SIGNAL(stateChanged(int)), this, SLOT(checkedMicCaptureDump(int)));
 
     connect(ui->checkBoxSpeaker, SIGNAL(stateChanged(int)), this, SLOT(checkedSpeakerDump(int)));
-
+    
     connect(this, SIGNAL(signal_add_remotestream(QString)), this, SLOT(add_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_del_remotestream(QString)), this, SLOT(del_remotestream(QString)), Qt::ConnectionType::QueuedConnection);
     connect(this, SIGNAL(signal_enterroom(QString)), this, SLOT(StartPushlishToServer(QString)), Qt::ConnectionType::QueuedConnection);
@@ -166,8 +172,8 @@ void MainWindow::EnterRoom() {
     LIVEROOM::SetRoomCallback(this);
 
     // µÇÂ¼·¿¼ä
-    ZGConfigHelperInstance()->SetPublishResolution(190, 190);
-    ZGConfigHelperInstance()->SetVideoBitrate(256000);
+    ZGConfigHelperInstance()->SetPublishResolution(640, 480);
+    ZGConfigHelperInstance()->SetVideoBitrate(1000000);
     LIVEROOM::SetPreviewView((void*)ui->widgetCamera->winId());
     LIVEROOM::StartPreview();
     int bpx = ui->lineEditAudiobps->text().toInt();
@@ -221,6 +227,11 @@ void MainWindow::currentIndexMicChanged(int index) {
 void MainWindow::currentIndexSpeakerChanged(int index) {
     QString id = ui->comboBoxSpeaker->currentData().toString();
     ZGConfigHelperInstance()->SetSpeakerDevice(id.toStdString());
+}
+
+void MainWindow::currentIndexCamera(int index) {
+    QString id = ui->comboBoxCamera->currentData().toString();
+    ZGConfigHelperInstance()->SetVideoDevice(id.toStdString());
 }
 
 void MainWindow::currentIndexChangedRole(int index) {
@@ -316,27 +327,33 @@ void MainWindow::checkedSpeakerDump(int state) {
 void MainWindow::checkedAGC(int state) {
     auto st = ui->checkBoxAGC->checkState();
     if (st == Qt::Checked) {
+        printf("Open AGC\n");
         LIVEROOM::EnableAGC(true);
     }
     else {
+        printf("Close AGC\n");
         LIVEROOM::EnableAGC(false);
     }
 }
 void MainWindow::checkedANS(int state) {
     auto st = ui->checkBoxANS->checkState();
     if (st == Qt::Checked) {
+        printf("Open ANS\n");
         LIVEROOM::EnableNoiseSuppress(true);
     }
     else {
+        printf("Close ANS\n");
         LIVEROOM::EnableNoiseSuppress(false);
     }
 }
 void MainWindow::checkedAEC(int state) {
     auto st = ui->checkBoxAEC->checkState();
     if (st == Qt::Checked) {
+        printf("Open AEC\n");
         LIVEROOM::EnableAEC(true);
     }
     else {
+        printf("Close AEC");
         LIVEROOM::EnableAEC(false);
     }
 }
@@ -392,6 +409,11 @@ void MainWindow::OnInitSDK(int nError) {
     if (nError != 0)
         return;
 
+    int bpx = ui->lineEditAudiobps->text().toInt();
+    LIVEROOM::SetAudioBitrate(bpx);
+    ZGConfigHelperInstance()->SetPublishResolution(640, 480);
+    ZGConfigHelperInstance()->SetVideoBitrate(1000000);
+
     LIVEROOM::EnableAGC(false);
     LIVEROOM::EnableNoiseSuppress(false);
     LIVEROOM::EnableAEC(false);
@@ -409,8 +431,7 @@ void MainWindow::OnInitSDK(int nError) {
         if (ui->comboBoxRole->currentData().toInt() == 0) {
             LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Anchor);
         }
-        else
-        {
+        else{
             LIVEROOM::LoginRoom(roomid.c_str(), ZEGO::LIVEROOM::Audience);
         }
     }
@@ -445,6 +466,12 @@ void MainWindow::StartPushlishToServer(QString) {
         std::string streamID = ui->lineEditPushId->text().toStdString();
         LIVEROOM::StartPublishing("", streamID.c_str(), publish_flag, "");
     }
+
+    
+
+    //LIVEROOM::SetCDNPublishTarget("rtmp://upstream.5see.com/live/11661888/116618880113171728?pushSecret=17a89f66d4f4d2e47811706913d555a5NINE");
+   // LIVEROOM::StartPublishing("","123456", AV::ZEGO_SINGLE_ANCHOR);
+
 }
 
 void MainWindow::OnLoginRoom(int errorCode,

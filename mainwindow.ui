@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1353</width>
+    <width>1318</width>
     <height>816</height>
    </rect>
   </property>
@@ -387,6 +387,20 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>摄像头</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBoxCamera"/>
+            </item>
+           </layout>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
              <widget class="QPushButton" name="pushButtonMix">
@@ -426,7 +440,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1353</width>
+     <width>1318</width>
      <height>26</height>
     </rect>
    </property>

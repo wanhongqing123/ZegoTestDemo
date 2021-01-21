@@ -71,6 +71,7 @@ public slots:
     void currentIndexChangedRole(int index);
     void currentIndexMicChanged(int index);
     void currentIndexSpeakerChanged(int index);
+    void currentIndexCamera(int index);
     void checkedAGC(int);
     void checkedANS(int);
     void checkedAEC(int);
